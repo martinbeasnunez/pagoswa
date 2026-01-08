@@ -270,28 +270,40 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // Message handling (POST)
   if (req.method === 'POST') {
-    res.status(200).send('OK'); // Respond immediately
-
     const body = req.body as WhatsAppWebhookBody;
-    if (body.object !== 'whatsapp_business_account') return;
+    console.log('📥 POST received:', JSON.stringify(body, null, 2));
+
+    // Respond immediately
+    res.status(200).send('OK');
+
+    if (body.object !== 'whatsapp_business_account') {
+      console.log('❌ Not a WhatsApp message, ignoring');
+      return;
+    }
 
     try {
       for (const entry of body.entry) {
         for (const change of entry.changes) {
           const messages = change.value.messages || [];
+          console.log(`📨 Messages found: ${messages.length}`);
+
           for (const msg of messages) {
+            console.log(`📱 Processing message from ${msg.from}, type: ${msg.type}`);
             await getOrCreateUser(msg.from);
 
             if (msg.type === 'image' && msg.image) {
+              console.log('🖼️ Handling image');
               await handleImage(msg);
             } else if (msg.type === 'text') {
+              console.log(`💬 Handling text: ${msg.text?.body}`);
               await handleText(msg);
             }
           }
         }
       }
+      console.log('✅ Webhook processed successfully');
     } catch (err) {
-      console.error('Webhook error:', err);
+      console.error('❌ Webhook error:', err);
     }
   }
 }

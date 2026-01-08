@@ -273,12 +273,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const body = req.body as WhatsAppWebhookBody;
     console.log('📥 POST received:', JSON.stringify(body, null, 2));
 
-    // Respond immediately
-    res.status(200).send('OK');
-
     if (body.object !== 'whatsapp_business_account') {
       console.log('❌ Not a WhatsApp message, ignoring');
-      return;
+      return res.status(200).send('OK');
     }
 
     try {
@@ -305,5 +302,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     } catch (err) {
       console.error('❌ Webhook error:', err);
     }
+
+    return res.status(200).send('OK');
   }
 }

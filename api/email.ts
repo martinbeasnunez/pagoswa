@@ -143,17 +143,27 @@ async function getUserByEmail(email: string) {
 
 // Get user by recipient email (gastos+userid@domain.com format)
 async function getUserByRecipientEmail(recipient: string) {
-  // Extract user identifier from email like "gastos+123456@martinbeasnunez.co"
+  // Extract user identifier from email like "gastos+123456@domain.com"
   const match = recipient.match(/gastos\+(\d+)@/i);
-  if (!match) return null;
+  if (!match) {
+    console.log('❌ No telegram ID found in recipient:', recipient);
+    return null;
+  }
 
   const telegramId = match[1];
-  const { data } = await supabase
+  console.log('🔍 Looking for user with telegram_id:', telegramId);
+
+  const { data, error } = await supabase
     .from('users')
     .select('*')
     .eq('telegram_id', telegramId)
     .single();
 
+  if (error) {
+    console.log('❌ Supabase error:', error.message);
+  }
+
+  console.log('👤 User lookup result:', data ? 'found' : 'not found');
   return data;
 }
 

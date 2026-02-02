@@ -279,9 +279,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       currency: transaction.currency,
       category: transaction.category,
       merchant: transaction.merchant,
-      description: transaction.cardLast4 ? `Tarjeta ****${transaction.cardLast4}` : null,
+      description: transaction.cardLast4 ? `Tarjeta ****${transaction.cardLast4}` : 'Interbank email',
       date: transaction.date,
-      source: 'email_interbank',
     });
 
     console.log('✅ Expense saved:', expense.id);
@@ -307,6 +306,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   } catch (err) {
     console.error('❌ Email handler error:', err);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error', details: String(err) });
   }
 }
